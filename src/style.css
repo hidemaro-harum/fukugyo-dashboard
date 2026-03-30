@@ -544,6 +544,25 @@ body::before {
   color: var(--text-muted);
 }
 
+.sim-result-card--furusato {
+  border-color: var(--accent-secondary);
+  background: rgba(0, 206, 201, 0.08);
+  margin-top: var(--space-sm);
+}
+
+.sim-result-card--furusato .sim-result-value {
+  color: var(--accent-secondary);
+}
+
+.sim-result-note {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+  font-family: var(--font-primary);
+  font-weight: 400;
+}
+
 /* --- データテーブル --- */
 .table-wrapper {
   overflow-x: auto;

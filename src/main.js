@@ -195,6 +195,8 @@ function updateSimulator() {
     $('sim-no-deduction').textContent = '—';
     $('sim-with-deduction').textContent = '—';
     $('sim-savings').textContent = '—';
+    $('sim-furusato-limit').textContent = '—';
+    $('sim-furusato-note').textContent = '';
     return;
   }
 
@@ -217,6 +219,16 @@ function updateSimulator() {
   $('sim-no-deduction').textContent = formatCurrency(result.noDeduction.takeHome);
   $('sim-with-deduction').textContent = formatCurrency(result.withDeduction.takeHome);
   $('sim-savings').textContent = `+${formatCurrency(result.savings)}`;
+
+  // ふるさと納税上限額
+  const furusatoCard = $('sim-furusato-card');
+  if ($('sim-furusato')?.checked && result.furusatoLimit > 0) {
+    furusatoCard.style.display = '';
+    $('sim-furusato-limit').textContent = formatCurrency(result.furusatoLimit);
+    $('sim-furusato-note').textContent = `※ 自己負担2,000円で約${formatCurrency(result.furusatoLimit - 2000)}分の返礼品`;
+  } else {
+    furusatoCard.style.display = 'none';
+  }
 }
 
 // ===== イベントリスナー =====
