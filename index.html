@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="副業フリーランスの収支・時給・節税効果を可視化するダッシュボード" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>副業収支ダッシュボード</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- ヘッダー -->
+    <header class="header">
+      <div class="header__left">
+        <h1 class="header__title">💰 副業収支ダッシュボード</h1>
+        <span class="header__badge">v1.0</span>
+      </div>
+      <div class="header__right">
+        <button id="btn-add-data" class="btn btn--primary">
+          <span class="btn__icon">＋</span>
+          データ入力
+        </button>
+        <button id="btn-settings" class="btn btn--ghost" title="設定">⚙️</button>
+      </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="dashboard">
+      <!-- 年収目標プログレスバー -->
+      <section class="goal-section" id="goal-section">
+        <div class="goal-header">
+          <span class="goal-label">🎯 年収目標</span>
+          <span class="goal-amount" id="goal-amount">¥0 / ¥4,200,000</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar__fill" id="goal-progress" style="width: 0%"></div>
+          <div class="progress-bar__glow" id="goal-glow" style="width: 0%"></div>
+        </div>
+        <div class="goal-footer">
+          <span class="goal-percent" id="goal-percent">0%</span>
+          <span class="goal-remaining" id="goal-remaining">残り ¥4,200,000（12ヶ月）</span>
+        </div>
+      </section>
+
+      <!-- カード グリッド -->
+      <div class="card-grid">
+        <!-- 収支推移 -->
+        <section class="card card--wide" id="revenue-card">
+          <div class="card__header">
+            <h2 class="card__title">📈 収支推移</h2>
+            <span class="card__subtitle">月次の売上・経費・手取り</span>
+          </div>
+          <div class="card__body">
+            <canvas id="chart-revenue"></canvas>
+          </div>
+        </section>
+
+        <!-- 時給推移 -->
+        <section class="card card--wide" id="hourly-card">
+          <div class="card__header">
+            <h2 class="card__title">🕐 時給推移</h2>
+            <span class="card__subtitle">自動化の効果を可視化</span>
+          </div>
+          <div class="card__body">
+            <canvas id="chart-hourly"></canvas>
+          </div>
+        </section>
+
+        <!-- 経費内訳 -->
+        <section class="card" id="expense-card">
+          <div class="card__header">
+            <h2 class="card__title">📊 経費内訳</h2>
+            <div class="card__toggle">
+              <button class="toggle-btn active" data-period="month">月別</button>
+              <button class="toggle-btn" data-period="year">年間</button>
+            </div>
+          </div>
+          <div class="card__body">
+            <canvas id="chart-expense"></canvas>
+          </div>
+        </section>
+
+        <!-- 年間予測 -->
+        <section class="card" id="forecast-card">
+          <div class="card__header">
+            <h2 class="card__title">🔮 年間予測</h2>
+          </div>
+          <div class="card__body forecast-body">
+            <div class="forecast-main">
+              <span class="forecast-label">予測年収</span>
+              <span class="forecast-amount" id="forecast-amount">¥0</span>
+            </div>
+            <div class="forecast-detail">
+              <div class="forecast-item">
+                <span class="forecast-item__label">目標比</span>
+                <span class="forecast-item__value" id="forecast-vs-goal">—</span>
+              </div>
+              <div class="forecast-item">
+                <span class="forecast-item__label">平均月収</span>
+                <span class="forecast-item__value" id="forecast-avg">—</span>
+              </div>
+              <div class="forecast-item">
+                <span class="forecast-item__label">平均時給</span>
+                <span class="forecast-item__value" id="forecast-hourly">—</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 節税 & 手取りシミュレーター -->
+      <section class="card card--full simulator-section" id="simulator-section">
+        <div class="card__header">
+          <h2 class="card__title">💰 節税 & 手取りシミュレーター</h2>
+          <span class="card__subtitle">控除の効果をリアルタイムで確認</span>
+        </div>
+        <div class="card__body simulator-body">
+          <div class="simulator-input">
+            <label class="sim-label">年間売上（税込）</label>
+            <input type="number" id="sim-revenue" class="sim-input" placeholder="4,200,000" />
+          </div>
+          <div class="simulator-controls">
+            <label class="sim-checkbox">
+              <input type="checkbox" id="sim-blue" checked />
+              <span>青色申告控除（65万）</span>
+            </label>
+            <div class="sim-slider-group">
+              <label class="sim-label">小規模企業共済 <span id="sim-mutual-display">¥70,000</span>/月</label>
+              <input type="range" id="sim-mutual" class="sim-slider" min="0" max="70000" step="1000" value="70000" />
+            </div>
+            <label class="sim-checkbox">
+              <input type="checkbox" id="sim-furusato" checked />
+              <span>ふるさと納税（上限額を自動計算）</span>
+            </label>
+          </div>
+          <div class="simulator-results">
+            <div class="sim-result-card">
+              <span class="sim-result-label">控除なし手取り</span>
+              <span class="sim-result-value" id="sim-no-deduction">—</span>
+            </div>
+            <div class="sim-result-arrow">→</div>
+            <div class="sim-result-card sim-result-card--highlight">
+              <span class="sim-result-label">控除あり手取り</span>
+              <span class="sim-result-value" id="sim-with-deduction">—</span>
+            </div>
+            <div class="sim-result-card sim-result-card--savings">
+              <span class="sim-result-label">節税効果</span>
+              <span class="sim-result-value" id="sim-savings">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 月次データテーブル -->
+      <section class="card card--full" id="data-table-section">
+        <div class="card__header">
+          <h2 class="card__title">📝 月次データ一覧</h2>
+          <div class="card__actions">
+            <button id="btn-import" class="btn btn--ghost btn--sm">📥 インポート</button>
+            <button id="btn-export" class="btn btn--ghost btn--sm">📤 エクスポート</button>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="table-wrapper">
+            <table class="data-table" id="data-table">
+              <thead>
+                <tr>
+                  <th>月</th>
+                  <th>売上</th>
+                  <th>稼働時間</th>
+                  <th>時給</th>
+                  <th>経費計</th>
+                  <th>手取り</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="data-table-body">
+                <!-- JSで動的生成 -->
+              </tbody>
+            </table>
+            <div class="table-empty" id="table-empty">
+              <p>📊 まだデータがありません</p>
+              <p>「＋ データ入力」から月次データを追加してください</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- データ入力モーダル -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal" id="modal-input">
+        <div class="modal__header">
+          <h2 class="modal__title">📝 月次データ入力</h2>
+          <button class="modal__close" id="modal-close">✕</button>
+        </div>
+        <div class="modal__body">
+          <div class="form-group">
+            <label class="form-label">月</label>
+            <input type="month" id="input-month" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">売上（税込）</label>
+            <input type="number" id="input-revenue" class="form-input" placeholder="350,000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">稼働時間</label>
+            <input type="number" id="input-hours" class="form-input" placeholder="120" />
+          </div>
+          <div class="form-divider">経費</div>
+          <div class="form-group">
+            <label class="form-label">通信費</label>
+            <input type="number" id="input-exp-comm" class="form-input" placeholder="5,000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">交通費</label>
+            <input type="number" id="input-exp-trans" class="form-input" placeholder="3,000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">消耗品費</label>
+            <input type="number" id="input-exp-supply" class="form-input" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">家賃（按分）</label>
+            <input type="number" id="input-exp-rent" class="form-input" placeholder="20,000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">水道光熱費（按分）</label>
+            <input type="number" id="input-exp-utility" class="form-input" placeholder="3,000" />
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" id="modal-cancel">キャンセル</button>
+          <button class="btn btn--primary" id="modal-save">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 設定モーダル -->
+    <div class="modal-overlay" id="settings-overlay">
+      <div class="modal" id="modal-settings">
+        <div class="modal__header">
+          <h2 class="modal__title">⚙️ 設定</h2>
+          <button class="modal__close" id="settings-close">✕</button>
+        </div>
+        <div class="modal__body">
+          <div class="form-group">
+            <label class="form-label">年間売上目標</label>
+            <input type="number" id="settings-goal" class="form-input" placeholder="4,200,000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">目標時給</label>
+            <input type="number" id="settings-hourly" class="form-input" placeholder="17,500" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">デモデータを読み込む</label>
+            <button class="btn btn--ghost" id="btn-load-demo">デモデータで試す</button>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" id="settings-cancel">キャンセル</button>
+          <button class="btn btn--primary" id="settings-save">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
